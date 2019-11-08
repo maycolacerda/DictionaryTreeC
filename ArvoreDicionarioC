@@ -1,0 +1,161 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<ctype.h>
+typedef struct elemento{
+        char letra;
+        int flagfim; //flag to show if any word ends here
+        struct elemento* prox[26];
+        }elemento;
+        
+elemento* insere(elemento *raiz,char *letra,int i); //insert character
+elemento* crianoh();// new knot
+void agoraimprime(elemento* topo, char palavra[30],int i);
+void atualiza(elemento* topo, char palavra[30],int i);
+void buscapalavra(elemento* topo, char palavra[30], int i);
+
+int main()
+{
+    elemento *topo;
+    FILE *p;
+    int i,j;
+    char palavra[30],op;
+    topo=crianoh();
+    topo->letra='*';
+    topo->flagfim=0;
+    p=fopen("dicionario.txt","r");
+    while((fscanf(p,"%s\n",palavra))!=EOF)
+    {
+    	i=palavra[0]-97;                      
+        topo->prox[i]=insere(topo->prox[i],palavra,0);
+                                   
+    }
+    
+    fclose(p);
+    printf("\n");
+    while(op!='x')
+	{
+		printf(" Digite a Opcao desejada\n");
+		printf(" a) inserir palavra\n");
+		printf(" b) buscar palavra\n");
+		printf(" c) sair do programa\n");
+		scanf("\n%c",&op);
+
+		switch(op)
+		{
+			case 'a':
+					printf("digite a palavra que deseja incluir\n");
+					scanf("\n%[^\n]s",palavra);
+					i=palavra[0]-97;
+					topo->prox[i]=insere(topo->prox[i],palavra,0);
+					printf("Palavra incluida com sucesso!!\n");
+					p=fopen("dicionario.txt","a+");
+					fprintf(p,"%s\n",palavra);
+					fclose(p);
+
+					break;
+			case 'b':	
+					printf("\tDIGITE A PALAVRA OU LETRA QUE DESEJA BUSCAR\n");
+					scanf("\n%[^\n]s",palavra);
+					i=palavra[0]-97;
+					buscapalavra(topo->prox[i],palavra,0);
+					break;
+			case 'c':	
+					op='x';
+					break;
+		
+			case 'd':
+					for(i=0;i<26;i++)    
+					{
+		     			if(topo->prox[i]!=NULL)
+                     		agoraimprime(topo->prox[i],palavra,0);
+    				}	
+			default: 
+					printf("Digite uma das opcoes\n");
+					
+
+		}
+
+	}
+    for(i=0;i<26;i++)
+    {
+		     if(topo->prox[i]!=NULL)
+                     agoraimprime(topo->prox[i],palavra,0);
+    }
+    printf("%c\n",topo->letra);
+    system("pause");
+} 
+elemento* insere(elemento* raiz, char letra[30],int i)
+{
+int j;
+if(raiz==NULL)
+{
+    raiz=crianoh();           
+}
+raiz->letra=letra[i];
+i++;	
+if(letra[i]!='\0')
+{
+                  
+    j=letra[i]-97;
+    raiz->prox[j]=insere(raiz->prox[j],letra,i);
+    return raiz;
+                  
+}
+if(letra[i]=='\0')
+{                 
+    raiz->flagfim=1;
+    return raiz;                 
+}
+                  
+}
+elemento* crianoh()
+{
+    elemento *aux;
+    int i;
+    aux=(elemento*)malloc(sizeof(elemento));
+    for(i=0;i<26;i++)
+    {
+        aux->prox[i]=NULL;       
+    }
+    	aux->flagfim=0;
+        return aux;         
+}
+void agoraimprime(elemento* topo, char palavra[30],int i)
+{
+ 
+  //printf("%c",topo->letra);
+  int j=0;
+  palavra[i]=topo->letra;
+  palavra[i+1]='\0';
+  if(topo->flagfim==1)
+    printf("%s\n",palavra);
+  i++;   
+  for(j=0;j<26;j++)
+  {
+         if(topo->prox[j]!=NULL)
+            agoraimprime(topo->prox[j],palavra,i);          
+  }   
+}
+void buscapalavra(elemento* topo, char palavra[30], int i)
+{
+        int j,k;
+        if(topo==NULL)
+        	printf(" Nao ha nada a fazer por aqui. nao existe palavra semelhante neste dicionario\n\n");
+        if(topo!=NULL)
+        {
+                i++;
+                j=palavra[i]-97;
+                if(palavra[i]=='\0')
+                {
+                    for(k=0;k<26;k++)
+                        if(topo->prox[k]!=NULL)
+                            agoraimprime(topo->prox[k],palavra,i);
+                } 
+                else
+                {
+                    buscapalavra(topo->prox[j],palavra,i);
+                }       
+                
+        }        
+ }
